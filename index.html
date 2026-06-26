@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MoonAi</title>
+    <!-- PWA Manifest & iOS Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <!-- Content Security Policy – verhindert XSS -->
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; script-src 'self' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src http://localhost:3000 https:;">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-900 text-white h-screen flex flex-col overflow-hidden antialiased">
+
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="flex items-center justify-center h-full z-50 bg-gray-900 absolute inset-0">
+        <div class="bg-gray-800 p-8 rounded-2xl shadow-xl w-80 text-center">
+            <h1 class="text-3xl mb-6 text-gray-200"><i class="fa-solid fa-moon"></i> MoonAi</h1>
+            <input type="email" id="email" placeholder="E-Mail" autocomplete="email"
+                   class="w-full p-3 mb-3 bg-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="password" id="password" placeholder="Passwort (min. 8 Zeichen)" autocomplete="current-password"
+                   class="w-full p-3 mb-6 bg-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 p-3 rounded-lg mb-2 transition">Login</button>
+            <button onclick="register()" class="w-full bg-gray-700 hover:bg-gray-600 p-3 rounded-lg transition">Registrieren</button>
+            <p id="auth-error" class="text-red-400 text-sm mt-3 hidden" role="alert"></p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="hidden flex h-full w-full">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-gray-950 flex-shrink-0 border-r border-gray-800 hidden md:flex flex-col transition-all duration-300">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+                <span class="font-semibold text-lg"><i class="fa-solid fa-moon"></i> MoonAi</span>
+                <button onclick="toggleSidebar()" class="md:hidden" aria-label="Sidebar schließen">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-3 flex-1 overflow-y-auto space-y-2" id="chat-history">
+                <button class="w-full text-left p-2 bg-gray-800 rounded-lg truncate text-sm">Neuer Chat</button>
+            </div>
+            <div class="p-4 border-t border-gray-800">
+                <button onclick="logout()" class="text-sm text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Chat Area -->
+        <main class="flex-1 flex flex-col relative h-full">
+            <header class="p-4 flex items-center border-b border-gray-800 md:hidden bg-gray-900">
+                <button onclick="toggleSidebar()" class="text-xl" aria-label="Menü öffnen">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <span class="ml-4 font-semibold">MoonAi</span>
+            </header>
+
+            <!-- Chat Window -->
+            <div id="chat-window" class="flex-1 overflow-y-auto p-4 pb-24 relative" role="log" aria-live="polite">
+                <!-- Empty State -->
+                <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-gray-700 pointer-events-none">
+                    <i class="fa-solid fa-moon text-7xl mb-4 opacity-50 drop-shadow-md"></i>
+                    <p class="text-lg opacity-50">Wie kann ich dir helfen?</p>
+                </div>
+                <div id="messages-container" class="space-y-6 max-w-3xl mx-auto z-10 relative"></div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="absolute bottom-0 w-full p-4 bg-gradient-to-t from-gray-900 via-gray-900 to-transparent">
+                <div class="max-w-3xl mx-auto relative flex items-end bg-gray-800 rounded-2xl p-2 border border-gray-700 shadow-lg">
+                    <label for="file-upload" class="p-3 text-gray-400 hover:text-white cursor-pointer transition" aria-label="Datei anhängen">
+                        <i class="fa-solid fa-plus"></i>
+                    </label>
+                    <input type="file" id="file-upload" class="hidden" accept="image/*, video/*, .pdf, .txt">
+
+                    <textarea id="chat-input" rows="1"
+                              placeholder="Nachricht an MoonAi…"
+                              class="flex-1 bg-transparent resize-none outline-none p-3 max-h-32 text-gray-100"
+                              oninput="autoGrow(this)"
+                              aria-label="Nachricht eingeben"></textarea>
+
+                    <button onclick="sendMessage()" aria-label="Nachricht senden"
+                            class="p-3 text-white bg-blue-600 rounded-xl hover:bg-blue-500 transition ml-2">
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                </div>
+                <div id="file-preview" class="max-w-3xl mx-auto mt-2 text-xs text-gray-400 hidden"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
