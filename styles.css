@@ -1,0 +1,25 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #0f0f0f;
+    color: white;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+#chat {
+    height: 60vh;
+    overflow-y: auto;
+    border: 1px solid #333;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+.message {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+}
+.user { background: #10a37f; align-self: flex-end; }
+.model { background: #333; }
