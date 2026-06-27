@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MoonAi – Dein intelligenter KI-Assistent" />
+  <meta name="theme-color" content="#171717" />
+  <title>MoonAi</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/styles.css" />
+
+  <!-- Highlight.js for syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <!-- Marked.js for Markdown rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════
+       AUTH SCREEN
+  ═══════════════════════════════════════ -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1 class="auth-title">MoonAi</h1>
+      </div>
+      <p class="auth-subtitle" id="auth-subtitle">Willkommen zurück</p>
+
+      <div id="auth-error" class="auth-error hidden"></div>
+
+      <div class="auth-form">
+        <div class="input-group">
+          <label for="auth-email">E-Mail</label>
+          <input type="email" id="auth-email" placeholder="deine@email.de" autocomplete="email" />
+        </div>
+        <div class="input-group">
+          <label for="auth-password">Passwort</label>
+          <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <button id="auth-submit-btn" class="btn-primary" type="button">Anmelden</button>
+      </div>
+
+      <p class="auth-toggle">
+        Noch kein Konto?
+        <button id="auth-toggle-btn" type="button">Konto erstellen</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       MAIN APP
+  ═══════════════════════════════════════ -->
+  <div id="app" class="app hidden">
+
+    <!-- ── Sidebar Overlay (Mobile) ── -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- ── Sidebar ── -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-top">
+        <button id="new-chat-btn" class="new-chat-btn" title="Neuer Chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>Neuer Chat</span>
+        </button>
+      </div>
+
+      <div class="sidebar-history">
+        <p class="history-label">Verlauf</p>
+        <ul id="chat-history-list" class="chat-list"></ul>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="user-profile">
+          <div class="user-avatar" id="user-avatar-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <span class="user-name" id="user-name-display">Nutzer</span>
+          <button id="logout-btn" class="logout-btn" title="Abmelden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Main Area ── -->
+    <main class="main-area">
+
+      <!-- Top Bar (Mobile) -->
+      <header class="topbar">
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="Menü öffnen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <span class="topbar-title">MoonAi</span>
+        <button id="sidebar-close-btn" class="sidebar-close-btn hidden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- Welcome Screen -->
+      <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-logo">
+          <svg class="moon-icon-large" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h2>MoonAi</h2>
+        </div>
+        <p class="welcome-sub">Wie kann ich dir heute helfen?</p>
+      </div>
+
+      <!-- Chat Messages -->
+      <div id="chat-messages" class="chat-messages hidden"></div>
+
+      <!-- Input Area -->
+      <div class="input-area-wrapper">
+        <!-- Image Preview -->
+        <div id="image-preview-container" class="image-preview-container hidden">
+          <div class="image-preview-inner">
+            <img id="image-preview" src="" alt="Vorschau" />
+            <button id="remove-image-btn" class="remove-image-btn" title="Bild entfernen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="input-box">
+          <!-- Attach Button -->
+          <button id="attach-btn" class="icon-btn attach-btn" title="Bild anhängen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+            </svg>
+          </button>
+          <input type="file" id="file-input" accept="image/jpeg,image/jpg,image/png" class="hidden" />
+
+          <!-- Textarea -->
+          <textarea
+            id="chat-input"
+            class="chat-input"
+            placeholder="Nachricht an MoonAi …"
+            rows="1"
+            maxlength="8000"
+          ></textarea>
+
+          <!-- Send Button -->
+          <button id="send-btn" class="send-btn" title="Senden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <line x1="12" y1="19" x2="12" y2="5"/>
+              <polyline points="5 12 12 5 19 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <p class="input-disclaimer">MoonAi kann Fehler machen. Wichtige Informationen bitte überprüfen.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Main App Script -->
+  <script src="/app.js" type="module"></script>
+
+</body>
+</html>
