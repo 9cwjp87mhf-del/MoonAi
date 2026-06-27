@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoonAi - Client-Side AI Space</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#171717">
+    <meta name="description" content="MoonAi - Vollständig lokale, sichere Web-KI basierend auf Gemma mit WebGPU-Beschleunigung.">
+    <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 192 192'><circle cx='96' cy='96' r='96' fill='%231d4ed8'/><circle cx='96' cy='96' r='60' fill='%233b82f6'/></svg>">
+</head>
+<body>
+
+    <!-- Auth Screen -->
+    <div id="auth-container" class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="brand-logo animate-glow"></div>
+                <h1>MoonAi</h1>
+                <p id="auth-subtitle">Lokale KI - 100% privat</p>
+            </div>
+            
+            <form id="auth-form" autocomplete="off">
+                <div class="input-group">
+                    <label for="auth-username">Benutzername</label>
+                    <input type="text" id="auth-username" required placeholder="z.B. astronaut1">
+                </div>
+                <div class="input-group">
+                    <label for="auth-password">Passwort</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••">
+                </div>
+                <div id="auth-error" class="error-text hidden"></div>
+                
+                <button type="submit" id="btn-primary" class="btn-full">Einloggen</button>
+            </form>
+            
+            <div class="auth-footer">
+                <button id="btn-toggle-auth" class="btn-link">Noch kein Konto? Registrieren</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app-container" class="app-wrapper hidden">
+        <header class="mobile-header">
+            <button id="btn-mobile-menu" aria-label="Menü öffnen">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <div class="mobile-brand">MoonAi</div>
+            <button id="btn-settings" class="btn-icon-only" aria-label="Einstellungen">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+        </header>
+
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <button id="btn-new-chat" class="btn-sidebar-action">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="21" y2="12"></line></svg>
+                    Neuer Chat
+                </button>
+                <button id="btn-sidebar-toggle" class="btn-icon-only desktop-only" aria-label="Sidebar einklappen">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                </button>
+            </div>
+
+            <nav id="chat-history" class="sidebar-scrollarea"></nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <span id="user-display-name">User</span>
+                </div>
+                <button id="btn-logout" class="btn-logout">
+                    Abmelden
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Model Loader -->
+            <div id="model-loader" class="model-loader-container hidden">
+                <div class="loader-card">
+                    <div class="spinner"></div>
+                    <h3>Lade lokale KI-Engine...</h3>
+                    <p>Modell: <strong class="accent-color">Gemma-2b (WebLLM)</strong></p>
+                    <div class="progress-bar-wrapper">
+                        <div id="model-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+                    </div>
+                    <span id="model-progress-text">0%</span>
+                </div>
+            </div>
+
+            <div id="chat-viewport" class="chat-viewport">
+                <div id="chat-welcome-screen" class="welcome-screen">
+                    <h2 class="watermark-logo">MoonAi</h2>
+                    <p class="welcome-text">Vollständig lokale KI • Maximale Privatsphäre • WebGPU-beschleunigt</p>
+                    <div id="hardware-status" class="status-badge">WebGPU wird geprüft...</div>
+                </div>
+                <div id="chat-messages-container" class="messages-container hidden"></div>
+            </div>
+
+            <footer class="chat-input-footer">
+                <div class="input-container-wrapper">
+                    <div id="image-preview-area" class="preview-area hidden">
+                        <div class="thumbnail-wrapper">
+                            <img id="image-thumbnail" src="" alt="Vorschau">
+                            <button id="btn-remove-image" class="btn-remove-thumb">&times;</button>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <button id="btn-trigger-upload" class="btn-input-icon" title="Bild hochladen">
+                            📎
+                        </button>
+                        <input type="file" id="hidden-file-input" accept="image/*" style="display: none;">
+                        
+                        <textarea id="chat-textarea" placeholder="Nachricht an MoonAi... (Shift+Enter = neue Zeile)" rows="1"></textarea>
+                        
+                        <button id="btn-send" class="btn-send-message" disabled title="Senden">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="input-safety-notice">
+                    MoonAi v2.0 • 100% lokal • WebLLM + Gemma
+                </div>
+            </footer>
+        </main>
+        
+        <div id="sidebar-backdrop" class="sidebar-backdrop hidden"></div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Einstellungen</h2>
+                <div class="settings-section">
+                    <label>Modell auswählen (zukünftig)</label>
+                    <select id="model-select">
+                        <option value="gemma-2b-it-q4f16_1-MLC">Gemma 2B (schnell)</option>
+                    </select>
+                </div>
+                <button id="btn-export-chats" class="btn-full">Chats exportieren (JSON)</button>
+                <button id="btn-clear-all" class="btn-full danger">Alle Chats löschen</button>
+                <button id="btn-close-settings" class="btn-full">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
