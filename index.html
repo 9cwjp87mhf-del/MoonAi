@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MoonAi – Lokaler KI-Chatbot, der direkt in deinem Browser läuft. Keine Cloud, keine Daten-Übertragung." />
+  <meta name="theme-color" content="#171717" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MoonAi" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>MoonAi</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Favicon / App Icon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23007AFF'/%3E%3Cpath d='M35 30 Q50 20 65 30 Q75 50 65 70 Q50 80 35 70 Q25 50 35 30Z' fill='%230051D4' opacity='0.7'/%3E%3C/svg%3E" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Highlight.js for syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+
+  <!-- Marked.js for Markdown parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js" defer></script>
+
+  <!-- DOMPurify for XSS-safe Markdown rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" defer></script>
+
+  <!-- WebLLM from jsDelivr CDN -->
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+
+  <!-- ===========================
+       AUTH OVERLAY
+  =========================== -->
+  <div id="auth-overlay" class="auth-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div class="auth-card" role="document">
+      <!-- Logo -->
+      <div class="auth-logo" aria-hidden="true">
+        <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="45" fill="#007AFF"/>
+          <path d="M35 30 Q50 20 65 30 Q75 50 65 70 Q50 80 35 70 Q25 50 35 30Z" fill="#0051D4" opacity="0.7"/>
+        </svg>
+      </div>
+      <h1 id="auth-title" class="auth-title">MoonAi</h1>
+      <p class="auth-subtitle">Dein lokaler KI-Assistent</p>
+
+      <!-- Tabs -->
+      <div class="auth-tabs" role="tablist" aria-label="Authentifizierung">
+        <button
+          id="tab-login"
+          class="auth-tab active"
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel-login"
+          data-tab="login"
+        >Anmelden</button>
+        <button
+          id="tab-register"
+          class="auth-tab"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-register"
+          data-tab="register"
+        >Registrieren</button>
+      </div>
+
+      <!-- Login Panel -->
+      <div id="panel-login" class="auth-panel active" role="tabpanel" aria-labelledby="tab-login">
+        <div class="form-group">
+          <label for="login-username" class="form-label">Benutzername</label>
+          <input
+            type="text"
+            id="login-username"
+            class="form-input"
+            placeholder="Dein Benutzername"
+            autocomplete="username"
+            maxlength="64"
+            aria-required="true"
+          />
+        </div>
+        <div class="form-group">
+          <label for="login-password" class="form-label">Passwort</label>
+          <div class="input-wrapper">
+            <input
+              type="password"
+              id="login-password"
+              class="form-input"
+              placeholder="Dein Passwort"
+              autocomplete="current-password"
+              maxlength="128"
+              aria-required="true"
+            />
+            <button type="button" class="toggle-password" data-target="login-password" aria-label="Passwort anzeigen">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="login-error" class="auth-error" role="alert" aria-live="assertive" hidden></div>
+        <button id="btn-login" class="auth-btn" type="button" aria-label="Anmelden">
+          <span class="btn-text">Anmelden</span>
+          <span class="btn-spinner" hidden aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <!-- Register Panel -->
+      <div id="panel-register" class="auth-panel" role="tabpanel" aria-labelledby="tab-register" hidden>
+        <div class="form-group">
+          <label for="reg-username" class="form-label">Benutzername</label>
+          <input
+            type="text"
+            id="reg-username"
+            class="form-input"
+            placeholder="Wähle einen Benutzernamen"
+            autocomplete="username"
+            maxlength="64"
+            aria-required="true"
+          />
+        </div>
+        <div class="form-group">
+          <label for="reg-password" class="form-label">Passwort</label>
+          <div class="input-wrapper">
+            <input
+              type="password"
+              id="reg-password"
+              class="form-input"
+              placeholder="Mind. 8 Zeichen"
+              autocomplete="new-password"
+              maxlength="128"
+              aria-required="true"
+            />
+            <button type="button" class="toggle-password" data-target="reg-password" aria-label="Passwort anzeigen">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="reg-confirm" class="form-label">Passwort bestätigen</label>
+          <div class="input-wrapper">
+            <input
+              type="password"
+              id="reg-confirm"
+              class="form-input"
+              placeholder="Passwort wiederholen"
+              autocomplete="new-password"
+              maxlength="128"
+              aria-required="true"
+            />
+            <button type="button" class="toggle-password" data-target="reg-confirm" aria-label="Passwort anzeigen">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="reg-error" class="auth-error" role="alert" aria-live="assertive" hidden></div>
+        <button id="btn-register" class="auth-btn" type="button" aria-label="Registrieren">
+          <span class="btn-text">Konto erstellen</span>
+          <span class="btn-spinner" hidden aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================
+       MAIN APP
+  =========================== -->
+  <div id="app" class="app" hidden aria-hidden="true">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar" role="complementary" aria-label="Chat-Verlauf">
+      <div class="sidebar-header">
+        <div class="sidebar-logo" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="45" fill="#007AFF"/>
+            <path d="M35 30 Q50 20 65 30 Q75 50 65 70 Q50 80 35 70 Q25 50 35 30Z" fill="#0051D4" opacity="0.7"/>
+          </svg>
+          <span class="sidebar-brand">MoonAi</span>
+        </div>
+        <button
+          id="btn-close-sidebar"
+          class="icon-btn sidebar-close-btn"
+          aria-label="Seitenleiste schließen"
+          title="Seitenleiste schließen"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <button id="btn-new-chat" class="new-chat-btn" type="button" aria-label="Neuen Chat starten">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Neuer Chat</span>
+      </button>
+
+      <div class="sidebar-section-label" aria-hidden="true">Verlauf</div>
+      <div id="chat-history-list" class="chat-history-list" role="list" aria-label="Gespeicherte Chats"></div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user-info" id="sidebar-user-info" aria-label="Eingeloggter Benutzer"></div>
+        <button id="btn-logout" class="logout-btn" type="button" aria-label="Abmelden">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span>Abmelden</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- SIDEBAR OVERLAY (mobile) -->
+    <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+    <!-- MAIN CHAT AREA -->
+    <main class="main-area" role="main">
+
+      <!-- TOP BAR -->
+      <header class="topbar" role="banner">
+        <button
+          id="btn-open-sidebar"
+          class="icon-btn hamburger-btn"
+          aria-label="Seitenleiste öffnen"
+          title="Seitenleiste öffnen"
+          aria-expanded="false"
+          aria-controls="sidebar"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span id="topbar-title" class="topbar-title" aria-live="polite">MoonAi</span>
+        <div class="topbar-status" id="topbar-status" aria-live="polite" aria-label="Modell-Status">
+          <span id="status-dot" class="status-dot status-loading" aria-hidden="true"></span>
+          <span id="status-text" class="status-text">Initialisiere Modell…</span>
+        </div>
+      </header>
+
+      <!-- MODEL LOADING PROGRESS -->
+      <div id="model-loading-banner" class="model-loading-banner" role="status" aria-live="polite" aria-label="Modell wird geladen">
+        <div class="loading-banner-inner">
+          <div class="loading-icon" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="45" fill="#007AFF"/>
+              <path d="M35 30 Q50 20 65 30 Q75 50 65 70 Q50 80 35 70 Q25 50 35 30Z" fill="#0051D4" opacity="0.7"/>
+            </svg>
+          </div>
+          <div class="loading-text-group">
+            <p class="loading-title">MoonAi lädt das KI-Modell…</p>
+            <p id="loading-detail" class="loading-detail">Mistral-7B-Instruct wird in deinen Browser heruntergeladen. Dies kann beim ersten Start einige Minuten dauern. Die Daten werden danach lokal gecacht.</p>
+          </div>
+          <div class="loading-progress-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="loading-progressbar">
+            <div class="loading-progress-track">
+              <div id="loading-progress-bar" class="loading-progress-fill"></div>
+            </div>
+            <span id="loading-progress-text" class="loading-progress-text">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHAT MESSAGES -->
+      <div id="chat-messages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions" aria-label="Chatverlauf">
+        <!-- Welcome state -->
+        <div id="welcome-screen" class="welcome-screen" aria-hidden="false">
+          <div class="welcome-logo" aria-hidden="true">
+            <svg width="64" height="64" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="45" fill="#007AFF" opacity="0.15"/>
+              <path d="M35 30 Q50 20 65 30 Q75 50 65 70 Q50 80 35 70 Q25 50 35 30Z" fill="#007AFF" opacity="0.3"/>
+            </svg>
+          </div>
+          <span class="welcome-wordmark" aria-label="MoonAi">MoonAi</span>
+          <p class="welcome-tagline">Vollständig lokal. Vollständig privat.</p>
+        </div>
+      </div>
+
+      <!-- IMAGE PREVIEW -->
+      <div id="image-preview-area" class="image-preview-area" hidden aria-label="Bildvorschau" aria-live="polite">
+        <div class="image-preview-inner">
+          <img id="image-preview-thumb" class="image-preview-thumb" src="" alt="Hochgeladenes Bild" />
+          <button id="btn-remove-image" class="remove-image-btn" type="button" aria-label="Bild entfernen" title="Bild entfernen">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <span id="image-preview-name" class="image-preview-name" aria-label="Dateiname"></span>
+      </div>
+
+      <!-- INPUT AREA -->
+      <div class="input-wrapper-outer">
+        <div id="rate-limit-warning" class="rate-limit-warning" role="alert" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="rate-limit-text">Limit erreicht. Warte bitte einige Minuten.</span>
+        </div>
+        <div class="input-bar" role="group" aria-label="Nachrichteneingabe">
+          <!-- Image upload button -->
+          <label
+            id="label-image-upload"
+            class="icon-btn input-icon-btn"
+            for="file-image-upload"
+            aria-label="Bild hochladen"
+            title="Bild hochladen (JPG, PNG, max. 5 MB)"
+            tabindex="0"
+            role="button"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </label>
+          <input
+            type="file"
+            id="file-image-upload"
+            accept="image/jpeg,image/jpg,image/png"
+            aria-hidden="true"
+            tabindex="-1"
+            style="display:none"
+          />
+
+          <!-- Textarea -->
+          <textarea
+            id="chat-input"
+            class="chat-input"
+            placeholder="Schreib eine Nachricht…"
+            rows="1"
+            maxlength="8000"
+            aria-label="Nachrichtenfeld"
+            aria-multiline="true"
+            autocomplete="off"
+            spellcheck="true"
+          ></textarea>
+
+          <!-- Send button -->
+          <button
+            id="btn-send"
+            class="icon-btn send-btn"
+            type="button"
+            aria-label="Nachricht senden"
+            title="Senden"
+            disabled
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <p class="input-disclaimer" aria-hidden="true">MoonAi läuft vollständig lokal in deinem Browser. Deine Daten verlassen nie dieses Gerät.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===========================
+       TOAST CONTAINER
+  =========================== -->
+  <div id="toast-container" class="toast-container" role="status" aria-live="polite" aria-atomic="true" aria-label="Benachrichtigungen"></div>
+
+</body>
+</html>
