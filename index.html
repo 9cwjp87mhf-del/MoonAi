@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoonAi - Ultrasicherer Client-Side KI-Chatbot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#171717">
+    <!-- WebLLM Library von CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.46/dist/index.js"></script>
+</head>
+<body>
+
+    <!-- Haupt-Chat-Interface -->
+    <div id="chat-container" class="chat-container">
+        
+        <!-- Linke Seitenleiste (Sidebar) -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">🌕 MoonAi</div>
+                <button id="close-sidebar-mobile" class="icon-btn mobile-only" aria-label="Seitenleiste schließen">✕</button>
+            </div>
+            
+            <button id="new-chat-btn" class="btn btn-new-chat">+ Neuer Chat</button>
+            
+            <!-- Vertikal scrollbare Chat-Historie -->
+            <div id="chat-history-list" class="sidebar-history">
+                <!-- Dynamisch eingefügte Chat-Historie -->
+            </div>
+            
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <span id="current-user-display" class="user-name">Lokaler Modus</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Hauptfenster (Rechts) -->
+        <main class="main-content">
+            <!-- Top Header Bar -->
+            <header class="chat-header">
+                <div class="header-left">
+                    <button id="toggle-sidebar-btn" class="icon-btn" aria-label="Seitenleiste umschalten">☰</button>
+                    <h1 class="header-title">MoonAi Workspace</h1>
+                </div>
+                <div id="model-status" class="model-status">Modell wird überprüft...</div>
+            </header>
+
+            <!-- Modell-Fortschrittsbalken -->
+            <div id="model-progress-container" class="progress-container hidden">
+                <div class="progress-info">
+                    <span id="progress-text">Lade KI-Modellgewichte in den Browser-Cache (WebGPU)...</span>
+                    <span id="progress-percentage">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div id="model-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- Chat-Verlauf-Bereich -->
+            <div id="chat-messages-area" class="chat-messages-area">
+                <!-- Inaktiver Zustand / Willkommens-Bildschirm -->
+                <div id="empty-state" class="empty-state">
+                    <div class="empty-logo">MoonAi</div>
+                    <p class="empty-subtitle">100% Client-Side. Deine Daten verlassen niemals dein Gerät.</p>
+                    <div class="specs-badge">Mistral / Phi WebGPU Engine</div>
+                </div>
+            </div>
+
+            <!-- Eingabebereich (Unten fixiert) -->
+            <footer class="chat-input-container">
+                <div class="input-wrapper">
+                    <!-- Bild-Upload-Vorschau (Thumbnail) -->
+                    <div id="image-preview-box" class="image-preview-box hidden">
+                        <img id="image-preview-thumbnail" src="" alt="Vorschau">
+                        <button id="remove-image-btn" class="remove-image-btn" aria-label="Bild entfernen">✕</button>
+                    </div>
+
+                    <!-- Eigentliche Eingabe-Zeile -->
+                    <div class="input-row">
+                        <label for="image-upload-input" class="image-upload-label" title="Bild hochladen (Max 5MB)">
+                            📷
+                            <input type="file" id="image-upload-input" accept="image/png, image/jpeg, image/jpg" class="hidden">
+                        </label>
+                        
+                        <textarea id="chat-textarea" rows="1" placeholder="Frage MoonAi etwas... (Shift+Enter für neue Zeile)" aria-label="Nachricht"></textarea>
+                        
+                        <button id="send-message-btn" class="send-message-btn" aria-label="Nachricht senden" disabled>➔</button>
+                    </div>
+                </div>
+                <div class="input-footer-info">
+                    Lokales Limit: max. 150 Anfragen alle 3 Std. | Ausgeführt über deine lokale GPU.
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

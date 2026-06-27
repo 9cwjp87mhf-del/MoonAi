@@ -1,0 +1,21 @@
+{
+  "short_name": "MoonAi",
+  "name": "MoonAi - Client-Side KI Chatbot PWA",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%233b82f6'><circle cx='50' cy='50' r='40'/><circle cx='65' cy='35' r='15' fill='%23171717'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%233b82f6'><circle cx='50' cy='50' r='40'/><circle cx='65' cy='35' r='15' fill='%23171717'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#171717",
+  "theme-color": "#171717",
+  "display": "standalone",
+  "orientation": "portrait"
+}
