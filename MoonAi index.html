@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MoonAi – Dein intelligenter KI-Assistent" />
+  <meta name="theme-color" content="#0d0d0d" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Highlight.js (Code Syntax Highlighting) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+
+  <!-- Marked.js (Markdown Rendering) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+
+  <!-- DOMPurify (XSS Sanitization) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js" defer></script>
+
+  <link rel="stylesheet" href="/styles.css" />
+  <title>MoonAi</title>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       AUTH OVERLAY (Login / Register)
+  ══════════════════════════════════════════ -->
+  <div id="auth-overlay" class="auth-overlay" aria-modal="true" role="dialog" aria-label="Anmeldung">
+    <div class="auth-card">
+      <!-- Logo -->
+      <div class="auth-logo">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="20" cy="20" r="20" fill="url(#moonGrad)" />
+          <path d="M28 20a10 10 0 01-14.14 9.14A10 10 0 1028 20z" fill="white" opacity="0.9"/>
+          <defs>
+            <linearGradient id="moonGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#7c3aed"/>
+              <stop offset="1" stop-color="#2563eb"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span>MoonAi</span>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true" aria-controls="panel-login" onclick="switchAuthTab('login')">Anmelden</button>
+        <button class="auth-tab" id="tab-register" role="tab" aria-selected="false" aria-controls="panel-register" onclick="switchAuthTab('register')">Registrieren</button>
+      </div>
+
+      <!-- Login Panel -->
+      <div id="panel-login" class="auth-panel active" role="tabpanel" aria-labelledby="tab-login">
+        <form id="login-form" novalidate>
+          <div class="form-group">
+            <label for="login-email">E-Mail</label>
+            <input type="email" id="login-email" name="email" placeholder="deine@email.de" autocomplete="email" required />
+            <span class="field-error" id="login-email-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="login-password">Passwort</label>
+            <div class="password-wrapper">
+              <input type="password" id="login-password" name="password" placeholder="Mindestens 8 Zeichen" autocomplete="current-password" required />
+              <button type="button" class="toggle-pw" aria-label="Passwort anzeigen" onclick="togglePassword('login-password', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <span class="field-error" id="login-password-error"></span>
+          </div>
+          <button type="submit" class="btn-primary" id="login-btn">
+            <span class="btn-text">Anmelden</span>
+            <span class="btn-spinner" hidden></span>
+          </button>
+          <p class="auth-error" id="login-error" role="alert"></p>
+        </form>
+      </div>
+
+      <!-- Register Panel -->
+      <div id="panel-register" class="auth-panel" role="tabpanel" aria-labelledby="tab-register">
+        <form id="register-form" novalidate>
+          <div class="form-group">
+            <label for="reg-username">Benutzername</label>
+            <input type="text" id="reg-username" name="username" placeholder="z. B. moonuser42" autocomplete="username" required />
+            <span class="field-error" id="reg-username-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="reg-email">E-Mail</label>
+            <input type="email" id="reg-email" name="email" placeholder="deine@email.de" autocomplete="email" required />
+            <span class="field-error" id="reg-email-error"></span>
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Passwort</label>
+            <div class="password-wrapper">
+              <input type="password" id="reg-password" name="password" placeholder="Mindestens 8 Zeichen" autocomplete="new-password" required />
+              <button type="button" class="toggle-pw" aria-label="Passwort anzeigen" onclick="togglePassword('reg-password', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <span class="field-error" id="reg-password-error"></span>
+          </div>
+          <button type="submit" class="btn-primary" id="register-btn">
+            <span class="btn-text">Konto erstellen</span>
+            <span class="btn-spinner" hidden></span>
+          </button>
+          <p class="auth-error" id="register-error" role="alert"></p>
+        </form>
+      </div>
+    </div>
+  </div><!-- /auth-overlay -->
+
+
+  <!-- ══════════════════════════════════════════
+       MAIN APP SHELL
+  ══════════════════════════════════════════ -->
+  <div id="app" class="app-shell" hidden>
+
+    <!-- ── SIDEBAR ───────────────────────────── -->
+    <aside id="sidebar" class="sidebar" aria-label="Chat-Verlauf">
+
+      <div class="sidebar-header">
+        <div class="sidebar-logo" aria-label="MoonAi Logo">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="16" cy="16" r="16" fill="url(#moonGradSide)" />
+            <path d="M22 16a8 8 0 01-11.31 7.31A8 8 0 1022 16z" fill="white" opacity="0.9"/>
+            <defs>
+              <linearGradient id="moonGradSide" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7c3aed"/>
+                <stop offset="1" stop-color="#2563eb"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>MoonAi</span>
+        </div>
+        <button class="icon-btn" id="sidebar-close-btn" aria-label="Sidebar schließen" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <button class="new-chat-btn" id="new-chat-btn" aria-label="Neuen Chat starten">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Neuer Chat
+      </button>
+
+      <nav class="chat-history-nav" aria-label="Chat-Verlauf">
+        <div class="history-section">
+          <span class="history-label">Heute</span>
+          <ul id="chat-list" class="chat-list" role="list"></ul>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info" id="user-info">
+          <div class="user-avatar" id="user-avatar" aria-hidden="true">U</div>
+          <div class="user-details">
+            <span class="user-name" id="user-name">Benutzer</span>
+            <span class="user-email" id="user-email">user@example.com</span>
+          </div>
+        </div>
+        <button class="icon-btn logout-btn" id="logout-btn" aria-label="Abmelden" title="Abmelden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+          </svg>
+        </button>
+      </div>
+    </aside>
+    <!-- /sidebar -->
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()" aria-hidden="true"></div>
+
+    <!-- ── MAIN CONTENT ────────────────────────── -->
+    <main class="main-content" id="main-content">
+
+      <!-- Top Bar -->
+      <header class="topbar" role="banner">
+        <button class="icon-btn" id="sidebar-toggle-btn" aria-label="Sidebar öffnen/schließen" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <span class="topbar-title" id="topbar-title">MoonAi</span>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="new-chat-top-btn" aria-label="Neuer Chat" title="Neuer Chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Messages Area -->
+      <section class="messages-area" id="messages-area" aria-label="Chat-Nachrichten" aria-live="polite">
+        <!-- Welcome Screen (shown when no chat is active) -->
+        <div class="welcome-screen" id="welcome-screen">
+          <div class="welcome-logo" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="32" cy="32" r="32" fill="url(#moonGradWelcome)" />
+              <path d="M44 32a14 14 0 01-19.8 12.8A14 14 0 1044 32z" fill="white" opacity="0.9"/>
+              <defs>
+                <linearGradient id="moonGradWelcome" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#7c3aed"/><stop offset="1" stop-color="#2563eb"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <h1 class="welcome-title">Wie kann ich dir helfen?</h1>
+          <p class="welcome-subtitle">Starte eine Unterhaltung oder wähle einen Vorschlag.</p>
+          <div class="suggestion-grid" role="list">
+            <button class="suggestion-card" role="listitem" onclick="useSuggestion('Erkläre mir Quantencomputing in einfachen Worten.')">
+              <span class="suggestion-icon">🔭</span>
+              <span>Quantencomputing einfach erklärt</span>
+            </button>
+            <button class="suggestion-card" role="listitem" onclick="useSuggestion('Schreibe ein Python-Script, das eine CSV-Datei einliest und die Daten visualisiert.')">
+              <span class="suggestion-icon">🐍</span>
+              <span>Python CSV-Visualisierung</span>
+            </button>
+            <button class="suggestion-card" role="listitem" onclick="useSuggestion('Was sind die wichtigsten Unterschiede zwischen REST und GraphQL?')">
+              <span class="suggestion-icon">⚡</span>
+              <span>REST vs. GraphQL erklärt</span>
+            </button>
+            <button class="suggestion-card" role="listitem" onclick="useSuggestion('Hilf mir, einen professionellen Lebenslauf für eine Stelle als Frontend-Entwickler zu schreiben.')">
+              <span class="suggestion-icon">📄</span>
+              <span>Professioneller Lebenslauf</span>
+            </button>
+          </div>
+        </div>
+        <!-- Messages rendered here by JS -->
+        <div id="messages-list" class="messages-list" role="log" aria-live="polite" aria-label="Nachrichten"></div>
+      </section>
+      <!-- /messages-area -->
+
+      <!-- Input Area -->
+      <footer class="input-area" role="contentinfo">
+        <!-- Image Preview Strip -->
+        <div class="image-previews" id="image-previews" hidden aria-label="Ausgewählte Bilder" aria-live="polite"></div>
+
+        <div class="input-box" id="input-box">
+          <!-- Image Upload Button -->
+          <label class="icon-btn upload-btn" for="image-upload-input" aria-label="Bild hochladen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 16v-4m0 0v-4m0 4h16m-4-4v4"/>
+              <path d="M12 4v12"/>
+            </svg>
+          </label>
+          <input type="file" id="image-upload-input" accept="image/*" multiple hidden />
+
+          <div class="message-input-wrapper">
+            <textarea id="message-input" rows="1" placeholder="Nachricht an MoonAi..." aria-label="Nachricht eingeben"></textarea>
+          </div>
+
+          <button class="icon-btn send-btn" id="send-btn" aria-label="Nachricht senden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Basic placeholder scripts to make the structure functional
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+      document.getElementById('sidebar-overlay').classList.toggle('active');
+    }
+
+    function switchAuthTab(tab) {
+      // Placeholder for tab switching
+      console.log('Switch to tab:', tab);
+    }
+
+    function togglePassword(id, btn) {
+      const input = document.getElementById(id);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.45 18.45 0 01-5.94 5.94M1 1l22 22"/></svg>';
+      } else {
+        input.type = 'password';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+      }
+    }
+
+    function useSuggestion(text) {
+      console.log('Suggestion used:', text);
+      // Placeholder
+    }
+
+    // Make app visible for demo
+    setTimeout(() => {
+      document.getElementById('auth-overlay').style.display = 'none';
+      document.getElementById('app').hidden = false;
+    }, 1000);
+
+    console.log('MoonAi index.html loaded successfully.');
+  </script>
+</body>
+</html>
