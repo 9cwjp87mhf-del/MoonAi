@@ -1,0 +1,128 @@
+:root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --text: #e0e0e0;
+    --accent: #00d4ff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app { display: flex; height: 100vh; }
+
+.sidebar {
+    width: 280px;
+    background: var(--surface);
+    border-right: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header { padding: 1rem; border-bottom: 1px solid #222; }
+
+#new-chat {
+    background: var(--accent);
+    color: black;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    width: 100%;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.chat-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.chat-item {
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 4px;
+}
+
+.chat-item:hover, .chat-item.active {
+    background: #1a1a1a;
+}
+
+.chat-container { flex: 1; display: flex; flex-direction: column; }
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.message {
+    max-width: 80%;
+    padding: 1rem 1.25rem;
+    border-radius: 18px;
+    line-height: 1.6;
+}
+
+.message.user {
+    align-self: flex-end;
+    background: var(--accent);
+    color: black;
+}
+
+.message.model {
+    align-self: flex-start;
+    background: #1f1f1f;
+}
+
+.input-area {
+    padding: 1rem;
+    background: var(--surface);
+    border-top: 1px solid #222;
+}
+
+.input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+#message-input {
+    flex: 1;
+    background: #222;
+    border: none;
+    padding: 1rem 1.25rem;
+    border-radius: 9999px;
+    color: white;
+    font-size: 1rem;
+}
+
+.upload-btn {
+    cursor: pointer;
+    padding: 0.75rem;
+    background: #222;
+    border-radius: 50%;
+}
+
+.image-preview {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+}
+
+.preview-img {
+    max-height: 120px;
+    border-radius: 8px;
+}
+
+pre { background: #000; padding: 1rem; border-radius: 8px; overflow-x: auto; }

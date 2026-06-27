@@ -1,0 +1,21 @@
+{
+    "name": "MoonAi",
+    "short_name": "MoonAi",
+    "description": "Elegante KI-Chat Plattform",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#0a0a0a",
+    "theme_color": "#00d4ff",
+    "icons": [
+        {
+            "src": "https://via.placeholder.com/192",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "https://via.placeholder.com/512",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

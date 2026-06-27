@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoonAi</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00d4ff">
+</head>
+<body>
+    <div class="app">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>MoonAi</h1>
+                <button id="new-chat">+ Neuer Chat</button>
+            </div>
+            <div id="chat-list" class="chat-list"></div>
+            <div class="sidebar-footer">
+                <div id="user-info"></div>
+                <button id="logout">Abmelden</button>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2 id="chat-title">Willkommen bei MoonAi</h2>
+            </div>
+            
+            <div id="messages" class="messages"></div>
+
+            <div class="input-area">
+                <form id="message-form">
+                    <div class="image-preview" id="image-preview"></div>
+                    <div class="input-wrapper">
+                        <label class="upload-btn">📎
+                            <input type="file" id="image-upload" accept="image/*" multiple>
+                        </label>
+                        <input type="text" id="message-input" placeholder="Nachricht an MoonAi..." autocomplete="off">
+                        <button type="submit" id="send-btn">Senden</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
